@@ -103,7 +103,7 @@ describe(`Component initialized with deep nested multi row setup.`, () => {
         </div>
       `,
       computed: {
-        ...fooModuleMapMultiRowFields([`users`]),
+        ...fooModuleMapMultiRowFields([`usersForm.users`]),
       },
     };
 
@@ -113,28 +113,31 @@ describe(`Component initialized with deep nested multi row setup.`, () => {
         fooModule: {
           namespaced: true,
           state: {
-            users: [
-              {
-                name: `Foo`,
-                email: `foo@foo.com`,
-                addresses: [{
-                  street: `First Street`,
-                  number: 42,
-                }],
-              },
-              {
-                name: `Bar`,
-                email: `bar@bar.com`,
-                addresses: [{
-                  street: `First Street`,
-                  number: 42,
+            usersForm: {
+
+              users: [
+                {
+                  name: `Foo`,
+                  email: `foo@foo.com`,
+                  addresses: [{
+                    street: `First Street`,
+                    number: 42,
+                  }],
                 },
                 {
-                  street: `Second Street`,
-                  number: 52,
-                }],
-              },
-            ],
+                  name: `Bar`,
+                  email: `bar@bar.com`,
+                  addresses: [{
+                    street: `First Street`,
+                    number: 42,
+                  },
+                  {
+                    street: `Second Street`,
+                    number: 52,
+                  }],
+                },
+              ],
+            }
           },
           getters: {
             getField,
@@ -155,8 +158,8 @@ describe(`Component initialized with deep nested multi row setup.`, () => {
   });
 
   test(`THIS WOULDN'T WORK WITHOUT createHelpers MAPPING FN -- It should update deep field values when the store is updated.`, () => {
-    store.state.fooModule.users[0].addresses[0].street = `New Street`;
-    store.state.fooModule.users[1].addresses[0].number = 43;
+    store.state.fooModule.usersForm.users[0].addresses[0].street = `New Street`;
+    store.state.fooModule.usersForm.users[1].addresses[0].number = 43;
 
     expect(wrapper.find(`.user-0-street-0`).element.value).toBe(`New Street`);
     expect(wrapper.find(`.user-1-number-0`).element.value).toBe(`43`);
@@ -167,7 +170,7 @@ describe(`Component initialized with deep nested multi row setup.`, () => {
     wrapper.find(`.user-1-street-0`).trigger(`input`);
     wrapper.find(`.user-1-number-1`).element.value = `43`;
     wrapper.find(`.user-1-number-1`).trigger(`input`);
-    expect(store.state.fooModule.users[1].addresses[0].street).toBe(`New Street`);
-    expect(store.state.fooModule.users[1].addresses[1].number).toBe(`43`);
+    expect(store.state.fooModule.usersForm.users[1].addresses[0].street).toBe(`New Street`);
+    expect(store.state.fooModule.usersForm.users[1].addresses[1].number).toBe(`43`);
   });
 });
