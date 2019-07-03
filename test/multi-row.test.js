@@ -148,14 +148,13 @@ describe(`Component initialized with deep nested multi row setup.`, () => {
     });
 
     wrapper = shallowMount(Component, { localVue, store });
-    console.log(store.state);
   });
 
   test(`It should render the component.`, () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  test(`THIS SHOULD NOT WORK -- It should update deep field values when the store is updated.`, () => {
+  test(`THIS WOULDN'T WORK WITHOUT createHelpers MAPPING FN -- It should update deep field values when the store is updated.`, () => {
     store.state.fooModule.users[0].addresses[0].street = `New Street`;
     store.state.fooModule.users[1].addresses[0].number = 43;
 
@@ -163,7 +162,7 @@ describe(`Component initialized with deep nested multi row setup.`, () => {
     expect(wrapper.find(`.user-1-number-0`).element.value).toBe(`43`);
   });
 
-  test(`THIS SHOULD NOT WORK -- It should update the store when the field values are updated. blau`, () => {
+  test(`THIS WOULDN'T WORK WITHOUT createHelpers MAPPING FN -- It should update the store when the field values are updated. blau`, () => {
     wrapper.find(`.user-1-street-0`).element.value = `New Street`;
     wrapper.find(`.user-1-street-0`).trigger(`input`);
     wrapper.find(`.user-1-number-1`).element.value = `43`;
