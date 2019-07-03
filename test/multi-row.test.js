@@ -103,7 +103,7 @@ describe(`Component initialized with deep nested multi row setup.`, () => {
         </div>
       `,
       computed: {
-        ...fooModuleMapMultiRowFields([`usersForm.users`]),
+        ...mapMultiRowFields('fooModule', [`usersForm.users`]),
       },
     };
 
@@ -145,8 +145,13 @@ describe(`Component initialized with deep nested multi row setup.`, () => {
           mutations: {
             updateField,
           },
-        }
-
+        },
+        getters: {
+          getField,
+        },
+        mutations: {
+          updateField,
+        },
       },
     });
 
@@ -157,7 +162,7 @@ describe(`Component initialized with deep nested multi row setup.`, () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  test(`THIS WOULDN'T WORK WITHOUT createHelpers MAPPING FN -- It should update deep field values when the store is updated.`, () => {
+  test(`It should update deep field values when the store is updated.`, () => {
     store.state.fooModule.usersForm.users[0].addresses[0].street = `New Street`;
     store.state.fooModule.usersForm.users[1].addresses[0].number = 43;
 
@@ -165,12 +170,12 @@ describe(`Component initialized with deep nested multi row setup.`, () => {
     expect(wrapper.find(`.user-1-number-0`).element.value).toBe(`43`);
   });
 
-  test(`THIS WOULDN'T WORK WITHOUT createHelpers MAPPING FN -- It should update the store when the field values are updated. blau`, () => {
-    wrapper.find(`.user-1-street-0`).element.value = `New Street`;
-    wrapper.find(`.user-1-street-0`).trigger(`input`);
+  test(`It should update the store when the field values are updated. blau`, () => {
+    wrapper.find(`.user-0-street-0`).element.value = `New Street`;
+    wrapper.find(`.user-0-street-0`).trigger(`input`);
     wrapper.find(`.user-1-number-1`).element.value = `43`;
     wrapper.find(`.user-1-number-1`).trigger(`input`);
-    expect(store.state.fooModule.usersForm.users[1].addresses[0].street).toBe(`New Street`);
+    expect(store.state.fooModule.usersForm.users[0].addresses[0].street).toBe(`New Street`);
     expect(store.state.fooModule.usersForm.users[1].addresses[1].number).toBe(`43`);
   });
 });
