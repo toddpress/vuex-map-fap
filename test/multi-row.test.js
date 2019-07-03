@@ -1,11 +1,16 @@
 import Vuex from 'vuex';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 
-import { mapMultiRowFields, getField, updateField } from '../src';
+import { mapMultiRowFields, getField, updateField, createHelpers } from '../src';
 
 const localVue = createLocalVue();
 
 localVue.use(Vuex);
+
+const { mapMultiRowFields: fooModuleMapMultiRowFields } = createHelpers({
+  getterType: 'fooModule/getField',
+  mutationType: 'fooModule/updateField',
+});
 
 describe(`Component initialized with multi row setup.`, () => {
   let Component;
@@ -89,67 +94,81 @@ describe(`Component initialized with deep nested multi row setup.`, () => {
     Component = {
       template: `
         <div>
-          <div v-for="(user, index) in users">
-            <input :class="'street-' + index" v-model="user.addresses[0].street">
-            <input :class="'number-' + index" v-model="user.addresses[0].number">
+          <div v-for="(user, user_index) in users">
+            <div v-for="(address, address_index) in user.addresses">
+              <input :class="'user-' + user_index + '-street-' + address_index" v-model="address.street">
+              <input :class="'user-' + user_index + '-number-' + address_index" v-model="address.number">
+            </div>
           </div>
         </div>
       `,
       computed: {
-        ...mapMultiRowFields([`users`]),
+        ...fooModuleMapMultiRowFields([`users`]),
       },
     };
 
+
     store = new Vuex.Store({
-      state: {
-        users: [
-          {
-            name: `Foo`,
-            email: `foo@foo.com`,
-            addresses: [{
-              street: `Rua da Batata`,
-              number: 42,
-            }],
+      modules: {
+        fooModule: {
+          namespaced: true,
+          state: {
+            users: [
+              {
+                name: `Foo`,
+                email: `foo@foo.com`,
+                addresses: [{
+                  street: `First Street`,
+                  number: 42,
+                }],
+              },
+              {
+                name: `Bar`,
+                email: `bar@bar.com`,
+                addresses: [{
+                  street: `First Street`,
+                  number: 42,
+                },
+                {
+                  street: `Second Street`,
+                  number: 52,
+                }],
+              },
+            ],
           },
-          {
-            name: `Bar`,
-            email: `bar@bar.com`,
-            addresses: [{
-              street: `Rua da Batata`,
-              number: 42,
-            }],
+          getters: {
+            getField,
           },
-        ],
-      },
-      getters: {
-        getField,
-      },
-      mutations: {
-        updateField,
+          mutations: {
+            updateField,
+          },
+        }
+
       },
     });
 
     wrapper = shallowMount(Component, { localVue, store });
+    console.log(store.state);
   });
 
   test(`It should render the component.`, () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  test(`It should update deep field values when the store is updated.`, () => {
-    store.state.users[1].addresses[0].street = `New Street`;
-    store.state.users[1].addresses[0].number = 43;
+  test(`THIS SHOULD NOT WORK -- It should update deep field values when the store is updated.`, () => {
+    store.state.fooModule.users[0].addresses[0].street = `New Street`;
+    store.state.fooModule.users[1].addresses[0].number = 43;
 
-    expect(wrapper.find(`.street-1`).element.value).toBe(`New Street`);
-    expect(wrapper.find(`.number-1`).element.value).toBe(`43`);
+    expect(wrapper.find(`.user-0-street-0`).element.value).toBe(`New Street`);
+    expect(wrapper.find(`.user-1-number-0`).element.value).toBe(`43`);
   });
 
-  test(`It should update the store when the field values are updated. blau`, () => {
-    wrapper.find(`.street-0`).element.value = `New Street`;
-    wrapper.find(`.street-0`).trigger(`input`);
-    wrapper.find(`.number-1`).element.value = `43`;
-    wrapper.find(`.number-1`).trigger(`input`);
-    expect(store.state.users[0].addresses[0].street).toBe(`New Street`);
-    expect(store.state.users[1].addresses[0].number).toBe(`43`);
+  test(`THIS SHOULD NOT WORK -- It should update the store when the field values are updated. blau`, () => {
+    wrapper.find(`.user-1-street-0`).element.value = `New Street`;
+    wrapper.find(`.user-1-street-0`).trigger(`input`);
+    wrapper.find(`.user-1-number-1`).element.value = `43`;
+    wrapper.find(`.user-1-number-1`).trigger(`input`);
+    expect(store.state.fooModule.users[1].addresses[0].street).toBe(`New Street`);
+    expect(store.state.fooModule.users[1].addresses[1].number).toBe(`43`);
   });
 });
