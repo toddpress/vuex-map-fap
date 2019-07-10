@@ -1,4 +1,7 @@
-# vuex-map-fields
+# vuex-map-fap!!!
+```js
+import {default as fap} from 'vuex-map-fap'
+```
 
 [![Patreon](https://img.shields.io/badge/patreon-donate-blue.svg)](https://www.patreon.com/maoberlehner)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://paypal.me/maoberlehner)
